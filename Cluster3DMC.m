@@ -18,9 +18,21 @@ disp('rect did not have 4 elements, using whole image')
 end;
 
 for n=1:nDepths
-wi{n}=rect(n,1):rect(n,1)+rect(n,3);
-hi{n}=rect(n,2):rect(n,2)+rect(n,4);
+wiTemp=rect(n,1):rect(n,1)+rect(n,3);
+hiTemp=rect(n,2):rect(n,2)+rect(n,4);
+
+%check Range Errors
+wiTemp(wiTemp>=511)=[];
+wiTemp(wiTemp<=1)=[];
+hiTemp(hiTemp>=511)=[];
+hiTemp(hiTemp<=1)=[];
+
+wi{n}=wiTemp;
+hi{n}=hiTemp;
+
 end
+
+
 
 %if dir is selected, make sure you provide a direcotry
 if exist(file)~=7;
