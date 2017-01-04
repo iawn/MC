@@ -38,9 +38,9 @@ elseif vs ==5.2 %should be largely similar to vs 5 just a few changes
         %field= strrep(field,'.','_'); %remove . from names if present
         val = val(2:end-1);
         try
-            eval(['header.SI.' field(4:end) ' =' val ';']);
+            eval(['header.' field(4:end) ' =' val ';']);
         catch %catch weird variables and translate to strings <>
-            header.SI.(field(4:end))=val;
+            header.(field(4:end))=val;
         end
     end
     [field, remainder ] = strtok(input(sIndex(i+1):end));
@@ -48,8 +48,8 @@ elseif vs ==5.2 %should be largely similar to vs 5 just a few changes
     %field= strrep(field,'.','_'); %remove . from names if present
     val2 = strtok(val);
     try
-        eval(['header.SI.' field(4:end) ' = ' val2 ';']);
+        eval(['header.' field(4:end) ' = ' val2 ';']);
     catch
-        header.SI.(field(4:end))=val;
+        header.(field(4:end))=val;
     end
 end

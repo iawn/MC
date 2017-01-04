@@ -1,4 +1,4 @@
-function Cluster3DMC(file,loadStart,numToLoad,rect,MD,nDepths);
+function Cluster3DMC(file,loadStart,numToLoad,rect,nDepths);
 
 % This code will motion correct and do pixel CI for all of the image stacks
 % located in the specified directory
@@ -28,6 +28,8 @@ if exist(file)~=7;
 end;
 
 
+
+
 %% get all files in dir
 k=dir(file);k(1:2)=[];
 i=1;
@@ -38,6 +40,12 @@ for n=1:(numel(k))
         i=i+1;
     end;
 end;
+
+%% Extract MetaData
+
+s = imfinfo(filenames{1});
+header = s(1).Software;
+MD = parseSI5Header(header); 
 
 
 %% check and see if .align file exists already in dir
