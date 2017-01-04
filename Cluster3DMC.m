@@ -9,11 +9,11 @@ function Cluster3DMC(file,loadStart,numToLoad,rect,MD,nDepths);
 
 if ~exist('rect');
 rect=[1 1 511 511];
-rect=repmat(rect,[4 1]);
+rect=repmat(rect,[nDepths 1]);
 disp('no rectangle, using whole image')
-elseif numel(rect)~=4;
+elseif numel(rect(:,1))~=nDepths;
 rect=[1 1 511 511];
-rect=repmat(rect,[4 1]);
+rect=repmat(rect,[nDepths 1]);
 disp('rect did not have 4 elements, using whole image')
 end;
 
