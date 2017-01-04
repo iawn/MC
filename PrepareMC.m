@@ -16,7 +16,7 @@ end
 
 Ims = ScanImageTiffReader(f).data();
 meta = ScanImageTiffReader(f).metadata();
-SI = parseSI5Header_arm(meta);
+SI = parseSI5Header(meta);
 
 nDepths=numel(SI.hStackManager.zs);
 

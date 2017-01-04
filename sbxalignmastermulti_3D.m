@@ -23,9 +23,10 @@ X = bsxfun(@times,X,1./sqrt(sum(X.^2)));
 
 
 
+theMatrixLine=theMatrix(:,1); %extract the first column of theMatrix to reduce overhead
 
 parfor jj = 1:length(theMatrix);
-    z = bigread3(ImageFile{theMatrix(jj,2)},theMatrix(jj,1),1);%load2P(ImageFile,'Frames',jj,'Double');
+    z = bigread3(ImageFile{theMatrix(jj,2)},theMatrixLine(jj),1);%load2P(ImageFile,'Frames',jj,'Double');
     z = double(z);
     z = z(hi,wi);
     %z=theStack(:,:,jj);
