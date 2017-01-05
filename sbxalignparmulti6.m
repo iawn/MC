@@ -54,7 +54,7 @@ A= A(hi,wi);
 
     
 
-    for ii = 1:nblocks %%%parfor actively changing
+    parfor ii = 1:nblocks %%%parfor actively changing
 
         subrg = rgs{ii};
 
