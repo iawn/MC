@@ -1,5 +1,5 @@
 
-function [imG imR]=bigread3(path_to_file,sframe,num2read)
+function [imG, imR, imData]=bigread3(path_to_file,sframe,num2read)
 %reads tiff files in Matlab bigger than 4GB, allows reading from sframe to sframe+num2read-1 frames of the tiff - in other words, you can read page 200-300 without rading in from page 1.  
 %based on a partial solution posted on Matlab Central (http://www.mathworks.com/matlabcentral/answers/108021-matlab-only-opens-first-frame-of-multi-page-tiff-stack)
 %Darcy Peterka 2014, v1.0
@@ -138,13 +138,16 @@ imData=cell2mat(imData);
 imData=reshape(imData,[he_h*mul,he_w,framenum]);
 
 imG=imData(:,:,1:2:framenum);
-imR=imData(:,:,2:2:framenum);
-
 imG=flip(rot90(imG));
-imR=flip(rot90(imR));
 
-%imData=flip(rot90(imData));
+if nargout>1 %don't do stuff that wont be outputed
+    imR=imData(:,:,2:2:framenum);
+    imR=flip(rot90(imR));
+end
 
+if nargout>2 %don't do stuff that wont be outputed
+    imData=flip(rot90(imData));
+end
 
 
 %imData = intmax(class(imData)) - imData; invert
