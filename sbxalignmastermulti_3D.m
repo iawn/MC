@@ -4,13 +4,16 @@ szz(1)=numel(hi);
 szz(2)=numel(wi);
 
 nfil=length(ImageFile);
+nDepth = MD.hFastZ.numFramesPerVolume;
+numVolumes =MD.hFastZ.numVolumes;
+nFramesTot = nDepth * numVolumes * 2; %total number of frames in an acq including red
 
 %Computing first order stats
 
 fprintf('Getting first-order stats\n');
-IF=1:nfil;
+IF=1:nfil; %image index
 IFr=1:2:2*MD.hFastZ.numVolumes * MD.hFastZ.numFramesPerVolume; % get green frame indx
-IFr=IFr(depth:MD.hFastZ.numFramesPerVolume:end);
+IFr=IFr(depth:nDepth:end); %get just this depth
 
 theMatrix=combvec(IFr,IF);
 theMatrix=theMatrix';
@@ -21,22 +24,64 @@ vs = 0;
 X = [ones(length(theMatrix),1),linspace(-1,1,length(theMatrix))'];
 X = bsxfun(@times,X,1./sqrt(sum(X.^2)));
 
+%find appropriate chunking volume to process some frames at a time;
 
 
-theMatrixLine=theMatrix(:,1); %extract the first column of theMatrix to reduce overhead
+maxChunk = 300;
+minChunk = 50; %will overwrite if can't find a better min
 
-parfor jj = 1:length(theMatrix);
-    z = bigread3(ImageFile{theMatrix(jj,2)},theMatrixLine(jj),1);%load2P(ImageFile,'Frames',jj,'Double');
-    z = double(z);
-    z = z(hi,wi);
-    %z=theStack(:,:,jj);
+if numVolumes <=maxChunk;
+    Chunk = numVolumes;
+else
 
-    ms = ms + z(:)*X(jj,:);
-    
-    vs = vs + z(:).^2;
-    
+M=2;
+p = perms(factor(numVolumes)) ; 
+y = unique(sort([p(:,1:M-1) prod(p(:,M:end),2)],2),'rows') ; %list of viable chunks ie 2 chunks of 300 frames
+
+Chunk = y(find(y(:,2)<=maxChunk & y(:,2)>=minChunk,1),2); %to load 50 to 500 frames at a time;
+while isempty(Chunk) && M<5
+    M=M+1; %if it is a large number of frames in each acq this will help
+    y = unique(sort([p(:,1:M-1) prod(p(:,M:end),2)],2),'rows') ; %list of viable chunks ie 2 chunks of 300 frames
+    Chunk = y(find(y(:,M)<=maxChunk & y(:,M)>=minChunk,1),M); %to load 50 to 500 frames at a time;
 end
 
+if isempty(Chunk) %if its still empty
+    fact = factor(numVolumes);
+    Chunk = fact(end);
+    disp(['could not find a good frame chunking number going at ' num2str(Chunk)]);
+end
+end
+
+numChunks = MD.hFastZ.numVolumes / Chunk;
+
+
+%ImageFile{theMatrix(jj,2)}
+effChunks = Chunk * 2 * nDepth; %effective chunks =frames *2 colors * n depths
+
+for i=1:numChunks*nfil;
+
+    z = bigread3(ImageFile{theMatrix((i-1)*Chunk+1,2)},...
+        rem(1+(i-1)*effChunks,nFramesTot),...
+        effChunks);%load2P(ImageFile,'Frames',jj,'Double');
+
+%z = z(:,:,1:2:end);%green
+z = z(:,:,depth:nDepth:end); %just this depth
+
+for jj = 1:Chunk;
+
+    z2 = double(z(:,:,jj));
+
+    z2 = z2(hi,wi);
+
+    %z=theStack(:,:,jj);
+
+    ms = ms + z2(:)*X(jj,:);
+
+    vs = vs + z2(:).^2;
+
+end
+
+end
 
 disp('loaded')
 k=sqrt(1/MD.hFastZ.numVolumes *(vs - sum(ms.^2,2)));

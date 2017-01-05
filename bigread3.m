@@ -143,6 +143,8 @@ imR=imData(:,:,2:2:framenum);
 imG=flip(rot90(imG));
 imR=flip(rot90(imR));
 
+%imData=flip(rot90(imData));
+
 
 
 %imData = intmax(class(imData)) - imData; invert
