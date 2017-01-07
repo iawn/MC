@@ -9,8 +9,6 @@ function Cluster3DMC(directory,loadStart,numToLoad,rect,basename,parallelDepths)
 %basename is a variable term if omitted will select all files in directory
 
 
-
-
 %if dir is selected, make sure you provide a direcotry
 if exist(directory)~=7;
     errordlg('Please provide directory')
@@ -18,6 +16,11 @@ end;
 
 if nargin<5 || isempty(basename) || ~ischar(basename)
     basename ='';
+    parallelDepths =0;
+end
+
+if nargin <6
+    parallelDepths=0;
 end
 
 
@@ -107,8 +110,9 @@ if parallelDepths
     
     
     for depth=1:nDepths;
-        
+        disp(['Launching Batch: ' num2str(depth)]);
         j(depth) = batch(['sbxAlignOneDepth(outputBase,useTheseFiles,hi,wi,MD,' num2str(depth) ')'],...
+            'AttachedFiles', 'sbxAlignOneDepth.m',...
             'Pool',jobCores(depth));
         
     end;
@@ -123,6 +127,7 @@ if parallelDepths
     disp('jobs completed');
 else
     for depth=1:nDepths;
+        disp(['Starting Depth: ' num2str(depth)]);
         sbxAlignOneDepth(outputBase,useTheseFiles,hi,wi,MD,depth)
     end
     disp('job completed');
@@ -131,19 +136,4 @@ end
 
 end
 
-function sbxAlignOneDepth(outputBase,useTheseFiles,hi,wi,MD,depth)
-OPB=[outputBase '_depth_' num2str(depth)];
-disp('Beginning MC')
-sbxalignmastermulti_3D(useTheseFiles,1,[OPB '.align'],hi{depth},wi{depth},MD,depth);
 
-save([OPB '.align'],'outputBase','-append');
-save([OPB '.align'],'file','-append');
-save([OPB '.align'],'loadStart','-append');
-save([OPB '.align'],'numToLoad','-append');
-save([OPB '.align'],'hi','wi','-append');
-try
-save([OPB '.align'],'rect','-append');
-end
-%sbxcomputeci(useTheseFiles,[outputBase '.align'],hi{depth},wi{depth}); %Takes about 10 minutes, eats up a ton of RAM
-
-end
