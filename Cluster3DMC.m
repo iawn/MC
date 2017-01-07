@@ -55,7 +55,7 @@ if ~exist('rect');
     rect=[1 1 511 511];
     rect=repmat(rect,[nDepths 1]);
     disp('no rectangle, using whole image')
-elseif ~all(size(rect) == [nDepths 4])
+elseif size(rect,2) ~=4
     rect=[1 1 511 511];
     rect=repmat(rect,[nDepths 1]);
     disp('rect did not have 4 elements, using whole image')
@@ -118,7 +118,7 @@ if parallelDepths
     end;
     
     %wait for jobs to end
-    for i=numel(j)
+    for i=1:numel(j)
         disp(['Waiting for job ' num2str(i) ' (others might still be running)']);
         wait(j(i));
         disp(['Diary for Depth ' num2str(i) ': ']);
