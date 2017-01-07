@@ -1,7 +1,5 @@
 function [m,v,T] = sbxaligniterativemulti6(ImageFile,m0,rg1,rg2,thestd,gl,l,theMatrix,hi,wi)
 
-
-
 % Aligns images in fname for all indices in idx
 
 % 
@@ -9,6 +7,8 @@ function [m,v,T] = sbxaligniterativemulti6(ImageFile,m0,rg1,rg2,thestd,gl,l,theM
 % m - mean image after the alignment
 
 % T - optimal translation for each frame
+
+
 
 
 %Config = load2PConfig(ImageFile);
@@ -31,17 +31,38 @@ l = l(rg1,rg2);
 
 max_idx = length(theMatrix);
 
+nFile = numel(ImageFile);
+
+if nFile>1
+    nFrames = find(theMatrix(:,2)>1,1)-1;
+else
+    nFrames = size(theMatrix,1);
+end
+
+if nFrames>500
+    fprintf('Warning large individual file sizes. maybe you should break this into chunks\n')
+end
+
+%nChunk=1; %if you add code to chunk this will change
+range = theMatrix(nFrames,1)-theMatrix(1,1)+1;
 
 
-parfor ii = 1:max_idx
+
+for i=1:nFile
+
+    [~,~,A1] = bigread3(ImageFile{nFile},theMatrix(1,1),range); 
+    A1 = A1(:,:,theMatrix(1:nFrames,1)-theMatrix(1,1)+1);
+    
+parfor ii = 1:nFrames
 
 %     A = load2P(ImageFile,'Frames',ii);
 %   %  A = theStack(:,:,ii);
 %     A=A(:,:,1,1);
 %     
     
-         A = bigread3(ImageFile{theMatrix(ii,2)},theMatrix(ii,1),1);%load2P(ImageFile,'Frames',jj,'Double');
-         A = double(A);
+         %A = bigread3(ImageFile{theMatrix(ii,2)},theMatrix(ii,1),1);%load2P(ImageFile,'Frames',jj,'Double');
+         
+         A = double(A1(:,:,ii));
     
          A = A(hi,wi);
     
@@ -71,7 +92,7 @@ parfor ii = 1:max_idx
 
 
 end
-
+end
 
 
 m = m/max_idx;

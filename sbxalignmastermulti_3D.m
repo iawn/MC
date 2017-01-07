@@ -9,7 +9,7 @@ numVolumes =MD.hFastZ.numVolumes;
 nFramesTot = nDepth * numVolumes * 2; %total number of frames in an acq including red
 
 %Computing first order stats
-
+lTime = tic;
 fprintf('Getting first-order stats\n');
 IF=1:nfil; %image index
 IFr=1:2:2*MD.hFastZ.numVolumes * MD.hFastZ.numFramesPerVolume; % get green frame indx
@@ -24,10 +24,8 @@ vs = 0;
 X = [ones(length(theMatrix),1),linspace(-1,1,length(theMatrix))'];
 X = bsxfun(@times,X,1./sqrt(sum(X.^2)));
 
-%find appropriate chunking volume to process some frames at a time;
-
-
-maxChunk = 300;
+%Find appropriate chunking volume to process some frames at a time;
+maxChunk = 500;
 minChunk = 50; %will overwrite if can't find a better min
 
 if numVolumes <=maxChunk;
@@ -48,7 +46,7 @@ end
 if isempty(Chunk) %if its still empty
     fact = factor(numVolumes);
     Chunk = fact(end);
-    disp(['could not find a good frame chunking number going at ' num2str(Chunk)]);
+    fprintf(['could not find a good frame chunking number going at ' num2str(Chunk) '\n']);
 end
 end
 
@@ -67,7 +65,7 @@ for i=1:numChunks*nfil;
 %z = z(:,:,1:2:end);%green
 z = z(:,:,depth:nDepth:end); %just this depth
 
-for jj = 1:Chunk;
+parfor jj = 1:Chunk;
 
     z2 = double(z(:,:,jj));
 
@@ -83,7 +81,7 @@ end
 
 end
 
-disp('loaded')
+fprintf(['First Order Stats done. Time ' num2str(toc(lTime)) 's \n'])
 k=sqrt(1/MD.hFastZ.numVolumes *(vs - sum(ms.^2,2)));
 s = reshape(k,[szz]);
 
@@ -117,10 +115,9 @@ fprintf('Alignment first pass\n');
 
 
 
-tic
+sapmTime  = tic;
 [m,~,T] = sbxalignparmulti6(ImageFile,thestd,gl,l,theMatrix,hi,wi); %Takes about 2.5 minutes
-toc
-
+fprintf(['First alignment ' num2str(toc(sapmTime)) 's\n']);
 
 rgx = (1:size(m,2))+45;
 
@@ -129,9 +126,9 @@ rgy = 32 + (1:size(m,1));
 T0 = T;
 
 
-tic
+
 for nn = 1:10
-    
+    passTime = tic;
     fprintf('Refining alignment... pass %d\n',nn);
     
     [m,~,T] = sbxaligniterativemulti6(ImageFile,m,rgy,rgx,thestd(rgy,rgx),gl,l,theMatrix,hi,wi);
@@ -140,21 +137,23 @@ for nn = 1:10
     
     T0 = T;
     
+    fprintf('delta: %.3f\n',dT);
+    fprintf(['This pass ' num2str(toc(passTime)) 's\n']); 
+    
     if dT < .25
         
         break;
         
     end
     
-    fprintf('delta: %.3f\n',dT);
+    
     
 end
-toc
+
 
 
 fprintf('Getting aligned first-order stats\n');
-
-
+alignFOStime = tic;
 
 ms = 0;
 
@@ -176,14 +175,21 @@ X = bsxfun(@times,X,1./sqrt(sum(X.^2)));
 
 g = exp(-(-5:5).^2/2/1.6^2);
 
-tic;
 
-parfor jj = 1:length(theMatrix)
-    
-    
-    
-         z = bigread3(ImageFile{theMatrix(jj,2)},theMatrix(jj,1),1);%load2P(ImageFile,'Frames',jj,'Double');
-         z = double(z);
+
+
+for i=1:numChunks*nfil;
+
+    z1 = bigread3(ImageFile{theMatrix((i-1)*Chunk+1,2)},...
+        rem(1+(i-1)*effChunks,nFramesTot),...
+        effChunks);%load2P(ImageFile,'Frames',jj,'Double');
+
+%z = z(:,:,1:2:end);%green
+z1 = z1(:,:,depth:nDepth:end); %just this depth
+
+parfor jj = 1:Chunk;
+
+        z = double(z1(:,:,jj));
          z = z(hi,wi);
     
    %z = single(load2P(ImageFile,'Frames',jj));
@@ -210,9 +216,9 @@ parfor jj = 1:length(theMatrix)
     v2 = v2 + z(:).^2;
     
 end
+end
 
-toc;
-
+fprintf(['Aligned First Order Stat Time: ' num2str(toc(alignFOStime)) 's\n']);
 
 
 ss = sqrt(1/length(theMatrix)*(vs - sum(ms.^2,2)));
@@ -241,12 +247,21 @@ m2 = reshape(m2(:,1)*X(1,1),size(l));
 k = 0;
 
 fprintf('Computing simple stats... pass %d\n',2);
+simpleStatsTime = tic;
 
-parfor jj = 1:length(theMatrix)
-    
-    
-         z = bigread3(ImageFile{theMatrix(jj,2)},theMatrix(jj,1),1);%load2P(ImageFile,'Frames',jj,'Double');
-         z = double(z);
+
+for i=1:numChunks*nfil;
+
+    z1 = bigread3(ImageFile{theMatrix((i-1)*Chunk+1,2)},...
+        rem(1+(i-1)*effChunks,nFramesTot),...
+        effChunks);%load2P(ImageFile,'Frames',jj,'Double');
+
+%z = z(:,:,1:2:end);%green
+z1 = z1(:,:,depth:nDepth:end); %just this depth
+
+parfor jj = 1:Chunk;
+
+        z = double(z1(:,:,jj));
          z = z(hi,wi);
    % z = load2P(ImageFile,'Frames',jj,'Double');
     %z = z(:,:,1,1);
@@ -268,7 +283,9 @@ parfor jj = 1:length(theMatrix)
     k  =  k + (z./s2).^4;
     
 end
+end
 
+fprintf(['Simple Stats Time: ' num2str(toc(simpleStatsTime)) 's\n']);
 
 
 sm = s2./m2;
@@ -296,7 +313,10 @@ end
  
 if computeci
 fprintf(['Starting CI\n']');
+ciTime = tic;
 sbxcomputeci3D(ImageFile,outputname,hi,wi,MD); %Takes about 10 minutes, eats up a ton of RAM
+fprintf(['CI time: ' num2str(toc(ciTime)) 's\n']);
+
 end 
 
 %end;

@@ -23,6 +23,7 @@ if nargin <6
     parallelDepths=0;
 end
 
+verboseFlag = 0;
 
 %% get all files in dir
 fprintf('Identifying Files... \n'); 
@@ -108,6 +109,9 @@ if parallelDepths
         jobCores(i)=jobCores(i)+1;
     end
     
+   jobCores=max(jobCores,1);
+    
+    disp([num2str(availCores) ' cores available. divided as: ' num2str(jobCores')]);
     
     for depth=1:nDepths;
         disp(['Launching Batch: ' num2str(depth)]);
@@ -119,16 +123,24 @@ if parallelDepths
     
     %wait for jobs to end
     for i=1:numel(j)
-        disp(['Waiting for job ' num2str(i) ' (others might still be running)']);
+        jTime = tic;
+        disp(['Waiting for Job ' num2str(i) ' (others might still be running)']);
         wait(j(i));
-        disp(['Diary for Depth ' num2str(i) ': ']);
-        diary(j(i));
+        disp(['Depth ' num2str(i) ' took ' num2str(toc(jTime)) 's additional']);
+        if verboseFlag
+            disp(['Diary for Depth ' num2str(i) ': ']);
+            diary(j(i));
+        end
     end
+    delete(j);
+    clear j;
     disp('jobs completed');
 else
     for depth=1:nDepths;
+        dTime=tic;
         disp(['Starting Depth: ' num2str(depth)]);
         sbxAlignOneDepth(outputBase,useTheseFiles,hi,wi,MD,depth)
+        disp(['Depth ' num2str(depth) ' took ' num2str(toc(dTime)) 's']);        
     end
     disp('job completed');
 end
