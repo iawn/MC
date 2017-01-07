@@ -58,20 +58,34 @@ if isempty(metaData)
 
     
 else %SI5.2
-    header = metaData;
+    header.SI = parseSI5Header(metaData);
     config.header = {header};
     
     config.Height = header.SI.hRoiManager.linesPerFrame;
     config.Width = header.SI.hRoiManager.pixelsPerLine;
-    config.Depth = header.SI.hStackManager.numSlices;
+    config.Depth = numel(header.SI.hStackManager.zs);%numSlices;
     config.ZStepSize = header.SI.hStackManager.stackZStepSize;
     config.Channels = size(header.SI.hChannels.channelSave,1);
-    config.FrameRate = 1 / SI.hRoiManager.scanFramePeriod;
+    config.FrameRate = 1 / header.SI.hRoiManager.scanFramePeriod;
     config.ZoomFactor = header.SI.hRoiManager.scanZoomFactor;
-    config.Frames = header.SI.hStackManager.framesPerSlice;
+    
+    if config.Depth>1
+        try
+            config.Frames = header.SI.hFastZ.numVolumes;
+            config.framesPerSlice = header.SI.hStackManager.framesPerSlice;
+        catch %in case stack from motor
+            config.Frames = header.SI.hStackManager.framesPerSlice;
+        end
+    else
+        config.Frames = header.SI.hStackManager.framesPerSlice;
+        try %hFastZ may not always be present
+            config.Volumes = header.SI.hFastZ.numVolumes;
+        end
+    end
     
     config.SIversion = header.SI.VERSION_MAJOR; %scanImage Version
-
+    
+    
     
 end
 
