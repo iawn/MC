@@ -5,7 +5,7 @@ function sbxAlignOneDepth(outputBase,useTheseFiles,hi,wi,MD,depth)
 OPB=[outputBase '_depth_' num2str(depth)];
 disp('Beginning MC')
 sbxalignmastermulti_3D(useTheseFiles,1,[OPB '.align'],hi{depth},wi{depth},MD,depth);
-return %%debug code
+%return %%debug code
 save([OPB '.align'],'outputBase','-append');
 save([OPB '.align'],'file','-append');
 save([OPB '.align'],'loadStart','-append');
