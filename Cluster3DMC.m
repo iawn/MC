@@ -146,6 +146,18 @@ else
 end
 
 
+%% Save Stuff
+fprintf('Saving Files/n');
+save([OPB '.align'],'outputBase','-append');
+save([OPB '.align'],'file','-append');
+save([OPB '.align'],'loadStart','-append');
+save([OPB '.align'],'numToLoad','-append');
+save([OPB '.align'],'hi','wi','-append');
+try
+save([OPB '.align'],'rect','-append');
+end
+
+
 end
 
 
