@@ -26,7 +26,7 @@ end
 verboseFlag = 0;
 
 %% get all files in dir
-fprintf('Identifying Files... \n'); 
+fprintf('Identifying Files... \n');
 k=dir(directory);k(1:2)=[];
 i=1;
 for n=1:(numel(k))
@@ -42,7 +42,7 @@ fprintf([ num2str(numel(filenames)) ' Files Detected... \n']);
 
 s = imfinfo(filenames{1});
 header = s(1).Software;
-MD = parseSI5Header(header); 
+MD = parseSI5Header(header);
 
 %% set rectangle
 try
@@ -109,17 +109,18 @@ if parallelDepths
         jobCores(i)=jobCores(i)+1;
     end
     
-   jobCores=max(jobCores,1);
+    jobCores=max(jobCores,1);
     
     disp([num2str(availCores) ' cores available. divided as: ' num2str(jobCores')]);
     
-    for depth=1:nDepths;
+    for depth=1:nDepths
         disp(['Launching Batch: ' num2str(depth)]);
         j(depth) = batch(['sbxAlignOneDepth(outputBase,useTheseFiles,hi,wi,MD,' num2str(depth) ')'],...
             'AttachedFiles', 'sbxAlignOneDepth.m',...
             'Pool',jobCores(depth));
-        
-    end;
+    end
+    
+    
     
     %wait for jobs to end
     for i=1:numel(j)
@@ -131,30 +132,47 @@ if parallelDepths
             disp(['Diary for Depth ' num2str(i) ': ']);
             diary(j(i));
         end
+
     end
     delete(j);
     clear j;
+
+    for depth=1:nDepths
+        OPB=[outputBase '_depth_' num2str(i)];
+        fprintf('Saving Files/n');
+        
+        save([OPB '.align'],'outputBase','-append');
+        save([OPB '.align'],'useTheseFiles','-append');
+        save([OPB '.align'],'loadStart','-append');
+        save([OPB '.align'],'numToLoad','-append');
+        save([OPB '.align'],'hi','wi','-append');
+        try
+            save([OPB '.align'],'rect','-append');
+        end
+        
+    end;
+    
     disp('jobs completed');
 else
-    for depth=1:nDepths;
+    for depth=1%:nDepths
         dTime=tic;
         disp(['Starting Depth: ' num2str(depth)]);
         sbxAlignOneDepth(outputBase,useTheseFiles,hi,wi,MD,depth)
-        disp(['Depth ' num2str(depth) ' took ' num2str(toc(dTime)) 's']);        
+        disp(['Depth ' num2str(depth) ' took ' num2str(toc(dTime)) 's']);
+        
+        OPB=[outputBase '_depth_' num2str(depth)];
+        fprintf('Saving Files/n');
+        save([OPB '.align'],'outputBase','-append');
+        save([OPB '.align'],'useTheseFiles','-append');
+        save([OPB '.align'],'loadStart','-append');
+        save([OPB '.align'],'numToLoad','-append');
+        save([OPB '.align'],'hi','wi','-append');
+        try
+            save([OPB '.align'],'rect','-append');
+        end
     end
+    
     disp('job completed');
-end
-
-
-%% Save Stuff
-fprintf('Saving Files/n');
-save([OPB '.align'],'outputBase','-append');
-save([OPB '.align'],'file','-append');
-save([OPB '.align'],'loadStart','-append');
-save([OPB '.align'],'numToLoad','-append');
-save([OPB '.align'],'hi','wi','-append');
-try
-save([OPB '.align'],'rect','-append');
 end
 
 
