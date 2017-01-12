@@ -182,8 +182,9 @@ function [m,v,T] = sbxalignsub(ImageFile,idx,rg1,rg2,thestd,gl,l,theMatrix,hi,wi
 
 
     elseif (length(idx)==2)
-    
-        if numel(unique(theMatrix(idx,2)))==1 %same file for each
+%     
+  
+        if 0;%numel(unique(theMatrix(idx,2)))==1 %same file for each
             %read both files to save time
             dif = theMatrix(idx(2),1) - theMatrix(idx(1),1);
             [~, ~, AB] = bigread3(ImageFile{theMatrix(idx(1),2)},theMatrix(idx(1),1),dif);
@@ -195,7 +196,7 @@ function [m,v,T] = sbxalignsub(ImageFile,idx,rg1,rg2,thestd,gl,l,theMatrix,hi,wi
             B = bigread3(ImageFile{theMatrix(idx(2),2)},theMatrix(idx(2),1),1);%load2P(ImageFile,'Frames',jj,'Double');
         end
    %orig code  
- %        A = bigread3(ImageFile{theMatrix(idx(1),2)},theMatrix(idx(1),1),1);%load2P(ImageFile,'Frames',jj,'Double');
+%          A = bigread3(ImageFile{theMatrix(idx(1),2)},theMatrix(idx(1),1),1);%load2P(ImageFile,'Frames',jj,'Double');
          A = double(A);
          A = A(hi,wi);
          A = A(rg1,rg2);
@@ -207,7 +208,7 @@ function [m,v,T] = sbxalignsub(ImageFile,idx,rg1,rg2,thestd,gl,l,theMatrix,hi,wi
 
         
 %orig code
- %        B = bigread3(ImageFile{theMatrix(idx(2),2)},theMatrix(idx(2),1),1);%load2P(ImageFile,'Frames',jj,'Double');
+%          B = bigread3(ImageFile{theMatrix(idx(2),2)},theMatrix(idx(2),1),1);%load2P(ImageFile,'Frames',jj,'Double');
          B = double(B);
      B = B(hi,wi);
        B = B(rg1,rg2);

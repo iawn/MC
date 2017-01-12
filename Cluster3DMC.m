@@ -139,7 +139,7 @@ if parallelDepths
 
     for depth=1:nDepths
         OPB=[outputBase '_depth_' num2str(i)];
-        fprintf('Saving Files/n');
+        fprintf('Saving Files\n');
         
         save([OPB '.align'],'outputBase','-append');
         save([OPB '.align'],'useTheseFiles','-append');
@@ -154,14 +154,14 @@ if parallelDepths
     
     disp('jobs completed');
 else
-    for depth=1%:nDepths
+    for depth=1:nDepths
         dTime=tic;
         disp(['Starting Depth: ' num2str(depth)]);
         sbxAlignOneDepth(outputBase,useTheseFiles,hi,wi,MD,depth)
         disp(['Depth ' num2str(depth) ' took ' num2str(toc(dTime)) 's']);
         
         OPB=[outputBase '_depth_' num2str(depth)];
-        fprintf('Saving Files/n');
+        fprintf('Saving Files\n');
         save([OPB '.align'],'outputBase','-append');
         save([OPB '.align'],'useTheseFiles','-append');
         save([OPB '.align'],'loadStart','-append');

@@ -50,10 +50,11 @@ range = theMatrix(nFrames,1)-theMatrix(1,1)+1;
 
 for i=1:nFile
 
-    [~,~,A1] = bigread3(ImageFile{nFile},theMatrix(1,1),range); 
+    [~,~,A1] = bigread3(ImageFile{i},theMatrix(1,1),range); 
     A1 = A1(:,:,theMatrix(1:nFrames,1)-theMatrix(1,1)+1);
     
-parfor ii = 1:nFrames
+    glReshape = reshape(gl,[numel(gl)/nFile nFile]); %so you don't have to send all of gl
+parfor ii = 1:nFrames 
 
 %     A = load2P(ImageFile,'Frames',ii);
 %   %  A = theStack(:,:,ii);
@@ -69,13 +70,13 @@ parfor ii = 1:nFrames
     
     A = double(A(rg1,rg2));
 
-    A = A - gl(ii)*l;
+    A = A - glReshape(ii,i)*l;
 
     A = A./thestd;
 
     [dx,dy] = fftalign(A,m0);
 
-    T(ii,:) = [dx,dy];
+    Tpart(ii,:) = [dx,dy]; 
 
     
 
@@ -92,6 +93,8 @@ parfor ii = 1:nFrames
 
 
 end
+T((i-1)*nFrames+1:i*nFrames,:) = Tpart; %process each chunk of the translation matrix and then concatenate together
+
 end
 
 

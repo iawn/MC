@@ -55,14 +55,14 @@ numChunks = MD.hFastZ.numVolumes / Chunk;
 
 %ImageFile{theMatrix(jj,2)}
 effChunks = Chunk * 2 * nDepth; %effective chunks =frames *2 colors * n depths
-
+rc1 =0;
 for i=1:numChunks*nfil;
 
-    z = bigread3(ImageFile{theMatrix((i-1)*Chunk+1,2)},...
+    [~,~,z] = bigread3(ImageFile{theMatrix((i-1)*Chunk+1,2)},...
         rem(1+(i-1)*effChunks,nFramesTot),...
         effChunks);%load2P(ImageFile,'Frames',jj,'Double');
 
-%z = z(:,:,1:2:end);%green
+z = z(:,:,1:2:end);%green
 z = z(:,:,depth:nDepth:end); %just this depth
 
 parfor jj = 1:Chunk;
@@ -73,13 +73,34 @@ parfor jj = 1:Chunk;
 
     %z=theStack(:,:,jj);
 
-    ms = ms + z2(:)*X(jj,:);
+    ms = ms + z2(:)*X(jj+(i-1)*Chunk,:);
 
     vs = vs + z2(:).^2;
-
+    rc1=rc1+1;
 end
 
 end
+
+% %%%%temp debug stuff
+% ms2 = 0;
+% vs2 = 0;
+% rc2 =0;
+% parfor ii = 1:length(theMatrix)
+%     zx = bigread3(ImageFile{theMatrix(ii,2)},...
+%         theMatrix(ii,1),...
+%         1);
+%      z2 = double(zx);
+% 
+%     z2 = z2(hi,wi);
+% 
+%     %z=theStack(:,:,jj);
+% 
+%     ms2 = ms2 + z2(:)*X(ii,:);
+% 
+%     vs2 = vs2 + z2(:).^2;
+%     rc2=rc2+1;
+% end
+
 
 fprintf(['First Order Stats done. Time ' num2str(toc(lTime)) 's \n'])
 k=sqrt(1/MD.hFastZ.numVolumes *(vs - sum(ms.^2,2)));
@@ -113,10 +134,16 @@ fprintf('Alignment first pass\n');
 %s=si;
 %thestd=thestdi;
 
-
+% %%%debug stuff
+% l2  = reshape(ms2(:,2),szz);
+% k2=sqrt(1/MD.hFastZ.numVolumes *(vs2 - sum(ms2.^2,2)));
+% s2 = reshape(k2,[szz]);
+% thestd2 = medfilt2(s2,[31,31],'symmetric');
 
 sapmTime  = tic;
 [m,~,T] = sbxalignparmulti6(ImageFile,thestd,gl,l,theMatrix,hi,wi); %Takes about 2.5 minutes
+% %debug stuff
+% [m2,~,T2] = sbxalignparmulti6(ImageFile,thestd2,gl,l2,theMatrix,hi,wi); %Takes about 2.5 minutes
 fprintf(['First alignment ' num2str(toc(sapmTime)) 's\n']);
 
 rgx = (1:size(m,2))+45;
@@ -197,13 +224,13 @@ parfor jj = 1:Chunk;
    %z=theStack(:,:,jj);
    z = z./thestd;
     
-    z = circshift(z,T(jj,:));
+    z = circshift(z,T(jj+(i-1)*Chunk,:));
     
     z = double(z);
     
     
     
-    ms = ms + z(:)*X(jj,:);
+    ms = ms + z(:)*X(jj+(i-1)*Chunk,:);
     
     vs = vs + z(:).^2;
     
@@ -211,7 +238,7 @@ parfor jj = 1:Chunk;
     
     z = conv2(g,g,z,'same');
     
-    m2 = m2 + z(:)*X(jj,:);
+    m2 = m2 + z(:)*X(jj+(i-1)*Chunk,:);
     
     v2 = v2 + z(:).^2;
     
@@ -270,7 +297,7 @@ parfor jj = 1:Chunk;
     z = z - gl(jj)*l;
     
     
-    z = circshift(z,T(jj,:));
+    z = circshift(z,T(jj+(i-1)*Chunk,:));
     
     z = z./thestd;
     
@@ -304,7 +331,7 @@ try
 
 catch
     
-    save([outputname],'m','v','thestd','sm','k','T','Q','-mat','-v7.3');
+    save(outputname,'m','v','thestd','sm','k','T','Q','-mat','-v7.3');
    % save([fname '.alignDebug'],'msi','vsi','thestdi','gli','li','si','-mat','-v7.3');
 
 end
