@@ -154,6 +154,17 @@ if parallelDepths
     
     disp('jobs completed');
 else
+    poolTime = tic;
+    nc = feature('numcores'); %number of cores
+    disp([num2str(nc) ' cores available.']);
+    try
+        parpool(nc);
+    catch
+        fprintf('Could not launch the desired number of cores switching to default\n')
+        parpool
+    end
+    fprintf(['Launching parpool took ' num2str(toc(poolTime)) 's\n']);
+    
     for depth=1:nDepths
         dTime=tic;
         disp(['Starting Depth: ' num2str(depth)]);
