@@ -212,11 +212,11 @@ g = exp(-(-5:5).^2/2/1.6^2);
 
 for i=1:numChunks*nfil;
 
-    z1 = bigread3(ImageFile{theMatrix((i-1)*Chunk+1,2)},...
-        rem(1+(i-1)*effChunks,nFramesTot),...
+     z1 = bigread3(ImageFile{theMatrix((i-1)*Chunk+1,2)},...
+        rem(1+(i-1)*effChunks,nFramesTot) + theMatrix(1,1)-1,... %include offset for red channel or skipped early frames **IMPORTANT** assumes every file has the same offset
         effChunks);%load2P(ImageFile,'Frames',jj,'Double');
 
-z1 = z1(:,:,1:2:end);%just this color (doesn't matter green or red)
+%z1 = z1(:,:,1:2:end);%just this color (doesn't matter green or red)
 z1 = z1(:,:,depth:nDepth:end); %just this depth
 
 parfor jj = 1:Chunk;
@@ -285,10 +285,10 @@ simpleStatsTime = tic;
 for i=1:numChunks*nfil;
 
     z1 = bigread3(ImageFile{theMatrix((i-1)*Chunk+1,2)},...
-        rem(1+(i-1)*effChunks,nFramesTot),...
+        rem(1+(i-1)*effChunks,nFramesTot)+ theMatrix(1,1)-1,... %include offset for red channel or skipped early frames **IMPORTANT** assumes every file has the same offset
         effChunks);%load2P(ImageFile,'Frames',jj,'Double');
 
-z1 = z1(:,:,1:2:end);%just this color (doesn't matter green or red)
+%z1 = z1(:,:,1:2:end);%just this color (doesn't matter green or red)
 z1 = z1(:,:,depth:nDepth:end); %just this depth
 
 parfor jj = 1:Chunk;
