@@ -1,4 +1,4 @@
-function Cluster3DMC(directory,loadStart,numToLoad,rect,basename,parallelDepths)
+function Cluster3DMC(directory,loadStart,numToLoad,rect,basename,useRed,parallelDepths)
 
 % This code will motion correct and do pixel CI for all of the image stacks
 % located in the specified directory
@@ -14,13 +14,24 @@ if exist(directory)~=7;
     errordlg('Please provide directory')
 end;
 
-if nargin<5 || isempty(basename) || ~ischar(basename)
+if nargin<4
+    rect=[1 1 511 511];
     basename ='';
     parallelDepths =0;
+    useRed =0;
+elseif nargin<5 
+    basename ='';
+    parallelDepths =0;
+    useRed =0;
+elseif nargin<6
+    useRed =0;
+    parallelDepths=0;
+elseif nargin <7
+    parallelDepths=0;
 end
 
-if nargin <6
-    parallelDepths=0;
+if isempty(basename) || ~ischar(basename)
+  basename='';
 end
 
 verboseFlag = 0;
@@ -115,7 +126,7 @@ if parallelDepths
     
     for depth=1:nDepths
         disp(['Launching Batch: ' num2str(depth)]);
-        j(depth) = batch(['sbxAlignOneDepth(outputBase,useTheseFiles,hi,wi,MD,' num2str(depth) ')'],...
+        j(depth) = batch(['sbxAlignOneDepth(outputBase,useTheseFiles,hi,wi,MD,' num2str(depth) ',useRed)'],...
             'AttachedFiles', 'sbxAlignOneDepth.m',...
             'Pool',jobCores(depth));
     end
@@ -168,7 +179,7 @@ else
     for depth=1:nDepths
         dTime=tic;
         disp(['Starting Depth: ' num2str(depth)]);
-        sbxAlignOneDepth(outputBase,useTheseFiles,hi,wi,MD,depth)
+        sbxAlignOneDepth(outputBase,useTheseFiles,hi,wi,MD,depth,useRed)
         disp(['Depth ' num2str(depth) ' took ' num2str(toc(dTime)) 's']);
         
         OPB=[outputBase '_depth_' num2str(depth)];

@@ -13,10 +13,11 @@ function [m,v,T] = sbxalignparmulti6(ImageFile,thestd,gl,l,theMatrix,hi,wi)
 
 
 
- A = bigread3(ImageFile{theMatrix(1,2)},theMatrix(1,1),1);%load2P(ImageFile,'Frames',jj,'Double');
- A = double(A);
+A = bigread3(ImageFile{theMatrix(1,2)},theMatrix(1,1),1);%load2P(ImageFile,'Frames',jj,'Double');
+
+A = double(A);
 A= A(hi,wi);
- 
+
 
     p = gcp();
 
@@ -156,9 +157,10 @@ function [m,v,T] = sbxalignsub(ImageFile,idx,rg1,rg2,thestd,gl,l,theMatrix,hi,wi
         %disp('L1')
         %idx
 
-     
-      
-         A = bigread3(ImageFile{theMatrix(idx(1),2)},theMatrix(idx(1),1),1);%load2P(ImageFile,'Frames',jj,'Double');
+        
+       
+        A = bigread3(ImageFile{theMatrix(idx(1),2)},theMatrix(idx(1),1),1);%load2P(ImageFile,'Frames',jj,'Double');
+
          A = double(A);
          A = A(hi,wi);
          A = A(rg1,rg2);
@@ -192,8 +194,10 @@ function [m,v,T] = sbxalignsub(ImageFile,idx,rg1,rg2,thestd,gl,l,theMatrix,hi,wi
             B = AB(:,:,dif);
             
         else %if different images load seperately
+            
             A = bigread3(ImageFile{theMatrix(idx(1),2)},theMatrix(idx(1),1),1);%load2P(ImageFile,'Frames',jj,'Double');
             B = bigread3(ImageFile{theMatrix(idx(2),2)},theMatrix(idx(2),1),1);%load2P(ImageFile,'Frames',jj,'Double');
+            
         end
    %orig code  
 %          A = bigread3(ImageFile{theMatrix(idx(1),2)},theMatrix(idx(1),1),1);%load2P(ImageFile,'Frames',jj,'Double');
@@ -207,13 +211,13 @@ function [m,v,T] = sbxalignsub(ImageFile,idx,rg1,rg2,thestd,gl,l,theMatrix,hi,wi
         A = A./thestd;
 
         
-%orig code
-%          B = bigread3(ImageFile{theMatrix(idx(2),2)},theMatrix(idx(2),1),1);%load2P(ImageFile,'Frames',jj,'Double');
-         B = double(B);
-     B = B(hi,wi);
-       B = B(rg1,rg2);
-
-%       B = B - gl(idx(2)+1)*l;
+        %orig code
+        %          B = bigread3(ImageFile{theMatrix(idx(2),2)},theMatrix(idx(2),1),1);%load2P(ImageFile,'Frames',jj,'Double');
+        B = double(B);
+        B = B(hi,wi);
+        B = B(rg1,rg2);
+        
+        %       B = B - gl(idx(2)+1)*l;
         B = B - gl(idx(2))*l;
 
         B = B./thestd;

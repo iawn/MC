@@ -1,4 +1,4 @@
-function sbxalignmastermulti_3D(ImageFile,computeci,outputname,hi,wi,MD,depth)
+function sbxalignmastermulti_3D(ImageFile,computeci,outputname,hi,wi,MD,depth,useRed)
 
 szz(1)=numel(hi);
 szz(2)=numel(wi);
@@ -12,7 +12,11 @@ nFramesTot = nDepth * numVolumes * 2; %total number of frames in an acq includin
 lTime = tic;
 fprintf('Getting first-order stats\n');
 IF=1:nfil; %image index
-IFr=1:2:2*MD.hFastZ.numVolumes * MD.hFastZ.numFramesPerVolume; % get green frame indx
+if useRed
+    IFr=2:2:2*MD.hFastZ.numVolumes * MD.hFastZ.numFramesPerVolume; % get red frame indx
+else
+    IFr=1:2:2*MD.hFastZ.numVolumes * MD.hFastZ.numFramesPerVolume; % get green frame indx
+end
 IFr=IFr(depth:nDepth:end); %get just this depth
 
 theMatrix=combvec(IFr,IF);
@@ -56,16 +60,17 @@ numChunks = MD.hFastZ.numVolumes / Chunk;
 %ImageFile{theMatrix(jj,2)}
 effChunks = Chunk * 2 * nDepth; %effective chunks =frames *2 colors * n depths
 rc1 =0;
-for i=1:numChunks*nfil;
+for i=1:numChunks*nfil
 
     [~,~,z] = bigread3(ImageFile{theMatrix((i-1)*Chunk+1,2)},...
         rem(1+(i-1)*effChunks,nFramesTot),...
         effChunks);%load2P(ImageFile,'Frames',jj,'Double');
-
-z = z(:,:,1:2:end);%green
+   
+        z = z(:,:,1:2:end);%select color (should be ever other from the start color regardless if thats green or red 
+    
 z = z(:,:,depth:nDepth:end); %just this depth
 
-parfor jj = 1:Chunk;
+parfor jj = 1:Chunk
 
     z2 = double(z(:,:,jj));
 
@@ -211,7 +216,7 @@ for i=1:numChunks*nfil;
         rem(1+(i-1)*effChunks,nFramesTot),...
         effChunks);%load2P(ImageFile,'Frames',jj,'Double');
 
-%z = z(:,:,1:2:end);%green
+z1 = z1(:,:,1:2:end);%just this color (doesn't matter green or red)
 z1 = z1(:,:,depth:nDepth:end); %just this depth
 
 parfor jj = 1:Chunk;
@@ -283,7 +288,7 @@ for i=1:numChunks*nfil;
         rem(1+(i-1)*effChunks,nFramesTot),...
         effChunks);%load2P(ImageFile,'Frames',jj,'Double');
 
-%z = z(:,:,1:2:end);%green
+z1 = z1(:,:,1:2:end);%just this color (doesn't matter green or red)
 z1 = z1(:,:,depth:nDepth:end); %just this depth
 
 parfor jj = 1:Chunk;
