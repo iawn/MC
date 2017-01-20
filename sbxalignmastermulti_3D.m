@@ -217,7 +217,7 @@ for i=1:numChunks*nfil;
         effChunks);%load2P(ImageFile,'Frames',jj,'Double');
 
 %z1 = z1(:,:,1:2:end);%just this color (doesn't matter green or red)
-z1 = z1(:,:,depth:nDepth:end); %just this depth
+z1 = z1(:,:,1:nDepth:end); %just this depth (note theMatrix(1,1) will ensure that it starts on an appropriate depth)(
 
 parfor jj = 1:Chunk;
 
@@ -289,7 +289,7 @@ for i=1:numChunks*nfil;
         effChunks);%load2P(ImageFile,'Frames',jj,'Double');
 
 %z1 = z1(:,:,1:2:end);%just this color (doesn't matter green or red)
-z1 = z1(:,:,depth:nDepth:end); %just this depth
+z1 = z1(:,:,1:nDepth:end); %just this depth (note theMatrix(1,1) will ensure that it starts on an appropriate depth)(
 
 parfor jj = 1:Chunk;
 
