@@ -64,9 +64,9 @@ MD = parseSI5Header(header);
 %% set rectangle
 try
     nDepths = MD.hFastZ.numFramesPerVolume;
-    if useDepths~=0;
-       nDepths=numel(useDepths);
-    end
+    %if useDepths~=0;
+    %   nDepths=numel(useDepths);
+    %end
 catch
     nDepths = 1;
 end
@@ -185,14 +185,14 @@ else
     end
     fprintf(['Launching parpool took ' num2str(toc(poolTime)) 's\n']);
     
-    for depth=1:nDepths
-        thisDepth=useDepths(depth);
+    for depth=useDepths;
+        %thisDepth=useDepths(depth);
         dTime=tic;
-        disp(['Starting Depth: ' num2str(thisDepth)]);
-        sbxAlignOneDepth(outputBase,useTheseFiles,hi,wi,MD,thisDepth,useRed)
-        disp(['Depth ' num2str(thisDepth) ' took ' num2str(toc(dTime)) 's']);
+        disp(['Starting Depth: ' num2str(depth)]);
+        sbxAlignOneDepth(outputBase,useTheseFiles,hi,wi,MD,depth,useRed)
+        disp(['Depth ' num2str(depth) ' took ' num2str(toc(dTime)) 's']);
         
-        OPB=[outputBase '_depth_' num2str(thisDepth)];
+        OPB=[outputBase '_depth_' num2str(depth)];
         fprintf('Saving Files\n');
         save([OPB '.align'],'outputBase','-append');
         save([OPB '.align'],'useTheseFiles','-append');
