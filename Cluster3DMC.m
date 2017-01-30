@@ -1,4 +1,4 @@
-function Cluster3DMC(directory,loadStart,numToLoad,rect,basename,useRed,parallelDepths)
+function Cluster3DMC(directory,loadStart,numToLoad,rect,basename,useRed,useDepths,parallelDepths)
 
 % This code will motion correct and do pixel CI for all of the image stacks
 % located in the specified directory
@@ -19,14 +19,20 @@ if nargin<4
     basename ='';
     parallelDepths =0;
     useRed =0;
+    useDepths=0;
 elseif nargin<5 
     basename ='';
     parallelDepths =0;
     useRed =0;
+    useDepths=0;
 elseif nargin<6
     useRed =0;
     parallelDepths=0;
+    useDepths=0;
 elseif nargin <7
+    useDepths=0;
+    parallelDepths=0;
+elseif nargin <8
     parallelDepths=0;
 end
 
@@ -58,6 +64,9 @@ MD = parseSI5Header(header);
 %% set rectangle
 try
     nDepths = MD.hFastZ.numFramesPerVolume;
+    if useDepths~=0;
+       nDepths=numel(useDepths);
+    end
 catch
     nDepths = 1;
 end
@@ -177,12 +186,13 @@ else
     fprintf(['Launching parpool took ' num2str(toc(poolTime)) 's\n']);
     
     for depth=1:nDepths
+        thisDepth=useDepths(depth);
         dTime=tic;
-        disp(['Starting Depth: ' num2str(depth)]);
-        sbxAlignOneDepth(outputBase,useTheseFiles,hi,wi,MD,depth,useRed)
-        disp(['Depth ' num2str(depth) ' took ' num2str(toc(dTime)) 's']);
+        disp(['Starting Depth: ' num2str(thisDepth)]);
+        sbxAlignOneDepth(outputBase,useTheseFiles,hi,wi,MD,thisDepth,useRed)
+        disp(['Depth ' num2str(thisDepth) ' took ' num2str(toc(dTime)) 's']);
         
-        OPB=[outputBase '_depth_' num2str(depth)];
+        OPB=[outputBase '_depth_' num2str(thisDepth)];
         fprintf('Saving Files\n');
         save([OPB '.align'],'outputBase','-append');
         save([OPB '.align'],'useTheseFiles','-append');
