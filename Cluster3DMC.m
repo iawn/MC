@@ -1,12 +1,22 @@
 function Cluster3DMC(directory,loadStart,numToLoad,rect,basename,useRed,useDepths,parallelDepths)
-
 % This code will motion correct and do pixel CI for all of the image stacks
 % located in the specified directory
-%clear all; close all; clc;
-%file = '/global/scratch/mardinly/AM63_1a/20160303_trimOff/';
-%loadStart=1;
-%numToLoad=304;
-%basename is a variable term if omitted will select all files in directory
+%
+%   Directory       - is the path to all of the files to be motion corrected
+%   loadStart       - Which file to begin the loading on (set to 1 for all
+%                     files)
+%   numToLoad       - Number of files to Motion Correct
+%   rect            - (optional) rectangle to exclude edges from motion
+%                     correction. defaults to [1 1 511 511]
+%   basename        - (optional) basename that all Motion Corrected Files must
+%                     match
+%   useRed          - (optional) align using red channel.
+%   useDepths       - (optional) array of depths to be processed this run.
+%                     defaults to all.
+%   parallelDepths  - (optional) different form of parallelization that
+%                     seperates each depth. In practice doesn't save much 
+%                     time as the load steps are the slow ones.
+
 
 
 %if dir is selected, make sure you provide a direcotry
