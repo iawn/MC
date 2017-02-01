@@ -10,7 +10,7 @@ function Cluster3DMC(directory,loadStart,numToLoad,rect,basename,useRed,useDepth
 
 
 %if dir is selected, make sure you provide a direcotry
-if exist(directory)~=7;
+if exist(directory)~=7
     errordlg('Please provide directory')
 end;
 
@@ -69,6 +69,10 @@ try
     %end
 catch
     nDepths = 1;
+end
+
+if useDepths == 0
+    useDepths = 1:nDepths;
 end
 
 
@@ -133,7 +137,7 @@ if parallelDepths
     
     disp([num2str(availCores) ' cores available. divided as: ' num2str(jobCores')]);
     
-    for depth=1:nDepths
+    for depth=useDepths
         disp(['Launching Batch: ' num2str(depth)]);
         j(depth) = batch(['sbxAlignOneDepth(outputBase,useTheseFiles,hi,wi,MD,' num2str(depth) ',useRed)'],...
             'AttachedFiles', 'sbxAlignOneDepth.m',...
@@ -157,7 +161,7 @@ if parallelDepths
     delete(j);
     clear j;
 
-    for depth=1:nDepths
+    for depth=useDepths
         OPB=[outputBase '_depth_' num2str(i)];
         fprintf('Saving Files\n');
         
@@ -185,7 +189,7 @@ else
     end
     fprintf(['Launching parpool took ' num2str(toc(poolTime)) 's\n']);
     
-    for depth=useDepths;
+    for depth=useDepths
         %thisDepth=useDepths(depth);
         dTime=tic;
         disp(['Starting Depth: ' num2str(depth)]);
