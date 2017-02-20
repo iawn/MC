@@ -74,6 +74,9 @@ MD = parseSI5Header(header);
 %% set rectangle
 try
     nDepths = MD.hFastZ.numFramesPerVolume;
+    if isempty(nDepths)
+        nDepths = 1;
+    end
     %if useDepths~=0;
     %   nDepths=numel(useDepths);
     %end
@@ -85,6 +88,10 @@ if useDepths == 0
     useDepths = 1:nDepths;
 end
 
+
+nDepths=numel(useDepths);
+
+fprintf([num2str(nDepths) ' depths requested: [' num2str(useDepths) ']\n']); 
 
 if ~exist('rect');
     rect=[1 1 511 511];
@@ -191,12 +198,14 @@ else
     poolTime = tic;
     nc = feature('numcores'); %number of cores
     disp([num2str(nc) ' cores available.']);
-    try
-        parpool(nc);
-    catch
-        fprintf('Could not launch the desired number of cores switching to default\n')
-        parpool
-    end
+    %     try
+    %         parpool(nc);
+    %     catch
+    %         fprintf('Could not launch the desired number of cores switching to default\n')
+    %         parpool
+    %     end
+    fprintf('Launching pool with default number of cores\n')
+    parpool
     fprintf(['Launching parpool took ' num2str(toc(poolTime)) 's\n']);
     
     for depth=useDepths
